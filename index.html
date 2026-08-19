@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Продакт на языке твоей профессии</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  :root{--bg:#0f1117;--card:#1a1d2e;--card2:#1e2235;--line:#2d3148;--ink:#e2e8f0;--soft:#94a3b8;--mute:#64748b;
+    --pp:#7c3aed;--pp2:#a78bfa;--ppd:#6d28d9;--gr:#4ade80;--grd:#16a34a;--am:#f59e0b;--bl:#38bdf8;--mg:#e879f9}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;background:var(--bg);color:var(--ink);
+    min-height:100vh;display:flex;flex-direction:column}
+  button{font-family:inherit;cursor:pointer;border:none}
+  .wrap{width:100%;max-width:620px;margin:0 auto;padding:0 16px;flex:1;display:flex;flex-direction:column}
+
+  .top{display:flex;align-items:center;gap:12px;padding:16px 0 10px}
+  .top .x{width:32px;height:32px;border-radius:9px;background:var(--card);border:1px solid var(--line);color:var(--mute);font-size:17px;display:grid;place-items:center}
+  .bar{flex:1;height:12px;border-radius:99px;background:var(--line);overflow:hidden}
+  .bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pp),var(--mg));border-radius:99px;transition:width .4s cubic-bezier(.4,1.3,.5,1)}
+  .step-n{font-size:12px;font-weight:800;color:var(--mute);min-width:38px;text-align:right}
+
+  /* HOME */
+  .home{flex:1;display:flex;flex-direction:column;justify-content:center;padding:26px 0 30px;animation:in .3s ease}
+  .home h1{font-size:27px;line-height:1.25;letter-spacing:-.5px;margin-bottom:12px}
+  .home h1 .g{background:linear-gradient(90deg,var(--pp2),var(--mg));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .home>p{font-size:15.5px;line-height:1.65;color:var(--soft);margin-bottom:26px}
+  .pick-q{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--mute);margin-bottom:12px}
+  .picks{display:flex;flex-direction:column;gap:11px}
+  .pick{display:flex;align-items:center;gap:14px;background:var(--card);border:1.5px solid var(--line);border-radius:15px;
+    padding:15px 16px;text-align:left;transition:transform .12s,border-color .15s,background .15s}
+  .pick:hover{border-color:#4c4f6b;transform:translateY(-2px)}
+  .pick:active{transform:scale(.99)}
+  .pick .em{width:46px;height:46px;border-radius:12px;background:#0d1017;border:1px solid var(--line);display:grid;place-items:center;font-size:24px;flex:none}
+  .pick .tt{flex:1;min-width:0}
+  .pick .nm{display:block;font-size:16.5px;font-weight:700;color:var(--ink);margin-bottom:3px}
+  .pick .tg{display:block;font-size:13px;color:var(--soft);line-height:1.35}
+  .pick .ar{color:var(--mute);font-size:20px;flex:none}
+  .pick-other{border-style:dashed;background:transparent}
+  .other-in{width:100%;min-height:54px;background:var(--card);border:1.5px solid var(--line);border-radius:13px;padding:14px 16px;color:var(--ink);font-size:16px;margin:6px 0 12px;font-family:inherit}
+  .other-in:focus{outline:none;border-color:var(--pp2)}
+  .other-in::placeholder{color:var(--mute)}
+  .home .fine{font-size:12px;color:var(--mute);text-align:center;margin-top:22px;line-height:1.5}
+
+  .stage{flex:1;display:flex;flex-direction:column;padding:8px 0 0;animation:in .28s ease}
+  @keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .who{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;
+    padding:4px 10px;border-radius:20px;margin-bottom:12px;width:fit-content}
+  .who.hr{background:#0c4a6e44;color:#7dd3fc;border:1px solid #075985}
+  .who.pm{background:#7c3aed22;color:var(--pp2);border:1px solid #3730a3}
+  .who.both{background:#4a044e33;color:#f5d0fe;border:1px solid #86198f}
+  h2{font-size:22px;line-height:1.28;letter-spacing:-.3px;margin-bottom:12px}
+  p{font-size:15.5px;line-height:1.7;color:var(--soft);margin-bottom:12px}
+  p strong,li strong{color:var(--ink)}
+  .funnel{background:#0d1017;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:12.5px;line-height:1.9;color:#a5f3fc;white-space:pre;overflow-x:auto}
+  .box{border-radius:10px;padding:13px 15px;margin:14px 0;border:1px solid;border-left-width:3px;font-size:14px;line-height:1.6}
+  .box .bl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+  .ins{background:#1e1b4b22;border-color:#3730a3;border-left-color:var(--pp)}.ins .bl{color:var(--pp2)}.ins p{color:#c4b5fd;margin:0}
+  .warn{background:#451a0322;border-color:#92400e;border-left-color:var(--am)}.warn .bl{color:var(--am)}.warn p{color:#fcd34d;margin:0}
+  .tool{background:#052e1622;border-color:#166534;border-left-color:var(--gr)}.tool .bl{color:var(--gr)}.tool p{color:#86efac;margin:0}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+  th{padding:8px 10px;text-align:left;color:var(--mute);font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--line)}
+  td{padding:8px 10px;color:#cbd5e1;border-bottom:1px solid var(--card2)}
+  tr.hot td{color:var(--mg);font-weight:700}
+
+  .opts{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+  .opt{display:flex;align-items:center;gap:12px;min-height:56px;background:var(--card);border:1.5px solid var(--line);border-radius:13px;
+    padding:14px 16px;font-size:15px;color:var(--ink);text-align:left;transition:transform .12s,border-color .15s,background .15s}
+  .opt:hover{border-color:#4c4f6b;transform:translateY(-1px)}
+  .opt:active{transform:scale(.99)}
+  .opt .k{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--mute);flex:none}
+  .opt.right{border-color:var(--gr);background:#052e1633;animation:pop .32s cubic-bezier(.3,1.5,.5,1)}.opt.right .k{border-color:var(--gr);color:var(--gr)}
+  .opt.wrong{border-color:#6b5563;background:#2a1f2a55;opacity:.75}
+  @keyframes pop{40%{transform:scale(1.02)}}
+
+  .foot{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(15,17,23,0),var(--bg) 30%);padding:14px 0 20px;margin-top:16px}
+  .verdict{border-radius:12px;padding:13px 15px;margin-bottom:11px;font-size:14px;line-height:1.6;display:none;animation:in .25s}
+  .verdict.show{display:block}
+  .verdict.ok{background:#052e1633;color:#86efac;border:1px solid #166534}
+  .verdict.no{background:#3a200a33;color:#fcd34d;border:1px solid #7c5410}
+  .btn{width:100%;min-height:54px;border-radius:14px;font-size:16px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--pp),var(--ppd));box-shadow:0 5px 0 #4c1d95;transition:.08s}
+  .btn:active{transform:translateY(3px);box-shadow:0 2px 0 #4c1d95}
+  .btn.ok{background:linear-gradient(135deg,var(--gr),var(--grd));box-shadow:0 5px 0 #14532d;color:#06281a}
+  .btn[disabled]{background:#2d3148;box-shadow:0 5px 0 #22253a;color:var(--mute);cursor:not-allowed}
+  .btn2{width:100%;min-height:50px;border-radius:14px;font-size:15px;font-weight:700;color:var(--pp2);background:var(--card);border:1.5px solid var(--line);margin-top:10px}
+  .btn2:active{transform:translateY(2px)}
+
+  .done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 0}
+  .done .big{font-size:66px;animation:pop2 .5s cubic-bezier(.3,1.6,.5,1)}
+  @keyframes pop2{from{transform:scale(0)}}
+  .done h2{margin:8px 0 4px}
+  .done p{margin-bottom:18px}
+  .recap{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;text-align:left;width:100%;margin-bottom:16px}
+  .recap div{font-size:14px;color:var(--soft);padding:7px 0 7px 24px;position:relative;border-bottom:1px solid var(--line)}
+  .recap div:last-child{border-bottom:none}
+  .recap div::before{content:'✓';position:absolute;left:2px;color:var(--gr);font-weight:800}
+  .recap .h{color:var(--pp2);font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:12px 0 4px;border-bottom:none}
+  .recap .h::before{content:''}
+  .recap .h:first-child{padding-top:0}
+  .recap .sk{padding-left:24px}
+  .recap .sk::before{content:'→';color:var(--bl)}
+  .ddv-final{background:linear-gradient(135deg,#1e1b4b,#2a1a4b);border:1px solid #3730a3;border-radius:14px;padding:16px 18px;margin-bottom:16px;width:100%}
+  .ddv-final .t{font-size:13px;color:#c4b5fd;line-height:1.6;text-align:center}
+  .ddv-final .t b{color:#f5d0fe}
+  .note{font-size:12px;color:var(--mute);text-align:center;padding:10px 0 24px;line-height:1.5}
+  .survey{width:100%;background:var(--card);border:1px solid #3730a3;border-radius:14px;padding:16px 16px 15px;margin:2px 0 14px;text-align:left}
+  .sv-q{font-size:15.5px;font-weight:700;color:var(--ink);line-height:1.4;margin-bottom:13px;text-align:center}
+  .sv-cta{display:flex;flex-direction:column;gap:10px}
+  .sv-opts{display:flex;flex-direction:column;gap:8px}
+  .sv-o{width:100%;min-height:46px;border-radius:11px;background:var(--card2);border:1.5px solid var(--line);color:var(--ink);font-size:14.5px;padding:10px 14px;text-align:left;transition:transform .12s,border-color .15s}
+  .sv-o:hover{border-color:#4c4f6b}.sv-o:active{transform:scale(.99)}
+  .sv-done{font-size:16px;color:#86efac;line-height:1.5;text-align:center;padding:4px 2px}
+  .sv-done b{color:#c4b5fd}
+  .sv-done .em{font-size:44px;display:block;margin-bottom:6px}
+  .sv-goal{background:#0d1017;border:1px solid #3730a3;border-radius:12px;padding:13px 15px;margin:0 0 14px;text-align:center}
+  .sv-goal .lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mute);margin-bottom:5px}
+  .sv-goal .role{font-size:18px;font-weight:800;color:var(--pp2);margin-bottom:5px}
+  .sv-goal .why{font-size:13.5px;color:#c4b5fd;line-height:1.5}
+  .sv-note{font-size:14px;color:var(--soft);line-height:1.55;margin-top:10px}
+  .sv-note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top" id="topbar" style="display:none">
+    <button class="x" id="backBtn" onclick="back()" title="Назад">←</button>
+    <div class="bar"><i id="fill"></i></div>
+    <span class="step-n" id="stepN"></span>
+    <button class="x" onclick="goHome()" title="К выбору профессии">⌂</button>
+  </div>
+  <div id="app"></div>
+</div>
+<div class="note" id="note"></div>
+
+<script>
+let TG=null;
+try{ TG=window.Telegram?.WebApp||null; if(TG){ TG.ready(); TG.expand(); TG.setHeaderColor&&TG.setHeaderColor('#0f1117'); TG.BackButton&&TG.BackButton.onClick(()=>back()); } }catch(e){}
+function haptic(type){ try{ if(!TG||!TG.HapticFeedback)return;
+  if(type==='ok')TG.HapticFeedback.notificationOccurred('success');
+  else if(type==='no')TG.HapticFeedback.notificationOccurred('error');
+  else TG.HapticFeedback.impactOccurred('light'); }catch(e){} }
+
+/* ===== АНАЛИТИКА / ТРЕКИНГ ===== */
+/* Включить сбор: впиши ключ PostHog в posthogKey (и host, если US-регион). Пусто = только консоль. */
+const AN = { posthogKey:'phc_uxzztfXuueJDpr7kECCA4mMULhbESAz9Y44fzFLPjsse', posthogHost:'https://us.i.posthog.com', endpoint:'' };
+if(AN.posthogKey){ try{
+  !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+  posthog.init(AN.posthogKey,{api_host:AN.posthogHost, capture_pageview:false, persistence:'localStorage'});
+}catch(e){} }
+const UID = (function(){ try{ let u=localStorage.getItem('pmc_uid'); if(!u){ u='u'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); localStorage.setItem('pmc_uid',u);} return u; }catch(e){ return 'u'+Math.random().toString(36).slice(2,9);} })();
+function track(event, props){
+  props = Object.assign({ uid:UID, ts:Date.now() }, props||{});
+  try{ console.log('[track]', event, props); }catch(e){}
+  try{ if(window.posthog && posthog.capture) posthog.capture(event, props); }catch(e){}
+  try{ if(AN.endpoint && navigator.sendBeacon) navigator.sendBeacon(AN.endpoint, JSON.stringify({event, props})); }catch(e){}
+}
+
+/* ================= КОНТЕНТ-ПАКИ ПО ПРОФЕССИЯМ ================= */
+const CASES = {
+
+/* ============ РЕКРУТЕР ============ */
+recruiter:{
+ name:'Рекрутер', em:'🧲', tag:'воронка найма → продакт в HR-tech',
+ goal:{role:'продакт в HR-tech', why:'Ты понимаешь рекрутера изнутри — этого нет у обычного джуна-PM'},
+ credit:'<span style="color:#7dd3fc">HR-консультант</span> — реалии найма · <span style="color:#a78bfa">Продуктовый эксперт</span> — механика',
+ steps:[
+ {type:'info', who:'hr', label:'Реалии найма',
+  h:'Продакта сократили. Помочь просят тебя',
+  body:`<p>Ты рекрутер в продуктовой компании. Продакта, который вёл внутренние HR-инструменты, сократили. Приходит директор: «Ты знаешь найм лучше всех — помоги, у нас найм еле шевелится».</p>
+  <p>Открываешь свои цифры за месяц по потоку Java-вакансий:</p>
+  <div class="funnel">600  профилей пересмотрено в сорсинге
+ 90  откликнулись
+ 30  прошли скрининг резюме
+  9  дошли до интервью
+  3  получили оффер
+  2  вышли на работу</div>
+  <p>Знакомое ощущение: сверху толпа, снизу двое. И заказчик спрашивает, почему так долго.</p>`},
+ {type:'quiz', who:'pm', label:'Продуктовая механика',
+  h:'С чего начнёшь?',
+  opts:['Сразу автоматизировать сорсинг — на него уходит больше всего времени','Понять, где именно теряем и сколько это стоит','Попросить нанять ещё одного рекрутера'],
+  answer:1,
+  ok:'Да. Сначала выяснить, где теряем, потом чинить. Иначе автоматизируешь то, что и так работает.',
+  no:'Логично, но рано. Пока не знаешь, где теряешь, автоматизация и найм людей — стрельба вслепую. Сначала — где потеря.'},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Это и есть discovery',
+  body:`<p>То, что ты выбираешь — «сначала пойму, где теряем» — называется <strong>discovery</strong>: сначала найти проблему, потом решать.</p>
+  <p>А твоя табличка — это <strong>воронка</strong>, и каждый переход в ней — <strong>конверсия</strong>. Ты считаешь конверсии годами, только под именем «процент прошедших скрининг».</p>
+  <div class="box ins"><div class="bl">Мостик</div><p>Продуктовые термины ты уже проживаешь на практике. Дальше — как они работают по-настоящему.</p></div>`},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Считаем — а рвётся ли вообще?',
+  body:`<table>
+  <tr><th>Переход</th><th>Числа</th><th>Конверсия</th></tr>
+  <tr><td>Сорсинг → отклик</td><td>600 → 90</td><td>15%</td></tr>
+  <tr><td>Отклик → скрининг</td><td>90 → 30</td><td>33%</td></tr>
+  <tr><td>Скрининг → интервью</td><td>30 → 9</td><td>30%</td></tr>
+  <tr><td>Интервью → оффер</td><td>9 → 3</td><td>33%</td></tr>
+  <tr><td>Оффер → выход</td><td>3 → 2</td><td>67%</td></tr>
+  </table>
+  <p><strong>Правило: чем ниже по воронке потеря — тем она дороже.</strong> В сорванный оффер уже вложены сорсинг, твои часы, время интервьюеров. Потерять человека там — выбросить два месяца работы всей цепочки. Поэтому смотреть всегда начинают снизу.</p>
+  <p>Смотрим снизу — и там всё в порядке. <strong>67% выходят с оффера — это норма</strong> (обычно 70–90%). Скрининг и интервью в рынке, 15% отклика на холодный сорсинг — нормально. <strong>Дыры нет.</strong></p>
+  <div class="box ins"><div class="bl">Вот это и есть открытие</div><p>Раз воронка здорова, проблема не в конверсиях. Она в том, <strong>сколько тебе стоит её верх</strong>: пересмотреть 600 профилей и каждому написать — это 40+ часов в месяц. Твоих.</p></div>
+  <div class="box warn"><div class="bl">Важный ход</div><p>Сначала проверь, есть ли дыра. <strong>Нет дыры — не выдумывай.</strong> Боль бывает не в конверсии, а в цене — и это другая задача.</p></div>`},
+ {type:'quiz', who:'pm', label:'Продуктовая механика',
+  h:'Идея: инструмент, который ловит кандидатов — сам находит подходящих и пишет им первым. Где он играет в воронке?',
+  opts:['Наверху: находит кандидатов и приводит отклики','Внизу: помогает дожимать оффер','Одинаково на всех этапах'],
+  answer:0,
+  ok:'Да. Он работает наверху — ловит. И бьёт по той боли, что мы нашли: по твоим часам на поиске.',
+  no:'Не совсем. Инструмент, который находит и приводит отклики, живёт наверху воронки — там, где и уходят твои часы. Дожим оффера он не закрывает, там другая игра.'},
+ {type:'info', who:'both', label:'HR + Продукт вместе',
+  h:'Где заканчивается инструмент и начинается человек',
+  body:`<p>Инструмент ловит кандидатов. А дожимает — рекрутер: разговором, силой бренда, работой с сомнениями. И когда работодатель кандидата выкатывает контроффер — отбивает его. Это <strong>не автоматизируется</strong>: оффер про доверие и эмоцию, а не про фильтр.</p>
+  <div class="box tool"><div class="bl">Твой ход</div><p>Ты проводишь границу: вот это делает продукт, вот это — человек. Это продуктовое решение о границах — одно из самых взрослых, что делает PM.</p></div>
+  <p>Автоматизация окупается там, где много рутины. Пересмотреть 600 профилей и написать каждому первое сообщение — рутина, её не жалко машине. Разговор с сомневающимся кандидатом — не рутина, отдавать нельзя.</p>
+  <div class="box warn"><div class="bl">Граница честности</div><p>«ИИ сам наймёт» — не бывает. Инструмент экономит часы, а не заменяет доверие.</p></div>`},
+ {type:'quiz', who:'pm', label:'Продуктовая механика',
+  h:'Как поймёшь, что инструмент реально полезен?',
+  opts:['Кандидатов «поймали» больше, чем раньше','Часы на поиск упали, а качество пойманных не просело','Директор доволен и хвалит'],
+  answer:1,
+  ok:'Точно. Сэкономленные часы без падения качества — вот польза. А «больше кандидатов» может и навредить: мусора больше, разгребать дольше.',
+  no:'Не совсем. «Больше кандидатов» и «начальник доволен» — красивые, но пустые цифры. Смотри на сэкономленные часы И на то, не просела ли воронка ниже.'},
+ {type:'info', who:'both', label:'HR + Продукт вместе',
+  h:'Всё это — деньги, и в твоём мире тоже',
+  body:`<p>В найме польза считается так: <strong>часы рекрутера</strong> + <strong>стоимость найма</strong> + <strong>время закрытия вакансии</strong>. Сэкономить 40 часов в месяц на поиске и первых письмах — это реальные деньги компании.</p>
+  <p>В продукте логика та же, слова другие: <strong>конверсия в оплату дороже конверсии в регистрацию</strong>, потому что до оплаты человека уже вели и тратили на него.</p>
+  <div class="box ins"><div class="bl">И вот тут HR tech</div><p>У тебя продукт для рекрутеров — и ты понимаешь пользователя изнутри, чего нет у обычного джуна-PM. Твой найм-опыт здесь не «непрофильное прошлое», а преимущество.</p></div>`},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Придумать — половина дела',
+  body:`<p>Идея есть. Дальше начинается вторая работа продакта — <strong>деливери</strong>: решить, что именно делаем, в каком порядке, и что честно отрезаем.</p>
+  <p>Реальность: у тебя <strong>один разработчик и два месяца</strong>. А задумано было: поиск подходящих, персональный первый контакт, автонапоминания молчунам, аналитика, интеграция с ATS.</p>
+  <div class="box ins"><div class="bl">Ты не кодишь — ты выбираешь</div><p>Код пишет разработчик. Работа продакта — решить, ЧТО строить и ПОЧЕМУ именно эту фичу, и вести команду: объяснить, зачем она, держать фокус. Программировать уметь не нужно — нужно выбрать и объяснить.</p></div>
+  <div class="box warn"><div class="bl">Так не бывает</div><p>Всё сразу не влезет — надо выбирать, что первым.</p></div>`},
+ {type:'quiz', who:'pm', label:'Продуктовая механика',
+  h:'Один разработчик, два месяца. Что делаешь первым?',
+  opts:['Автонапоминания молчунам — быстрая и заметная фича','Ядро: находит подходящих и пишет им первым — то, что собственно ловит','Интеграцию с ATS — без неё ничего не заработает'],
+  answer:1,
+  ok:'Да. Берём самое дешёвое, что проверяет главную ставку: ловит инструмент кандидатов или нет. Напоминания, аналитика и ATS — потом, если ядро сработает.',
+  no:'Не совсем. И напоминания, и интеграция с ATS — вокруг да около, а не проверка главной ставки (ATS ещё и дорогая). Бери то, что дёшево и отвечает: ловит инструмент кандидатов или нет.'},
+ {type:'info', who:'both', label:'HR + Продукт вместе',
+  h:'Это называется приоритизация. И ты в ней давно',
+  body:`<p>Выбрать одно и отрезать остальное — это <strong>приоритизация</strong>, а первый маленький кусок, который проверяет идею, — <strong>MVP</strong>. Не «урезанная версия», а самый дешёвый способ проверить.</p>
+  <div class="box tool"><div class="bl">Твой навык, который уже работает</div><p>Заказчик приходит с «нужен senior, 10 лет, пять языков, вчера и за три копейки». Ты выясняешь, что реально нужно, и режешь требования до выполнимых. Это она и есть — приоритизация. В найме это «согласовать профиль вакансии».</p></div>`},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Перед запуском — сформулируй ставку',
+  body:`<p>Прежде чем строить, продакт вслух проговаривает, на что ставит. Не «сделаем и посмотрим», а <strong>гипотеза</strong> — проверяемая ставка:</p>
+  <div class="box ins"><div class="bl">Твоя гипотеза</div><p><b>Если</b> инструмент сам найдёт подходящих и напишет им первым,<br><b>то</b> я сэкономлю ~40 часов в месяц на поиске и вакансии закроются быстрее,<br><b>потому что</b> сейчас мои часы уходят на перебор профилей, а не на людей.</p></div>
+  <div class="box warn"><div class="bl">Запомни это слово</div><p>В любой гипотезе есть слово-предположение, на котором всё держится. Здесь это — <strong>«подходящих»</strong>. Ставка держится на том, что инструмент найдёт подходящих, а не просто побольше. Обычно ломается оно.</p></div>`},
+ {type:'quiz', who:'pm', label:'Аналитика',
+  h:'Запустили. Через месяц инструмент дотянулся до 2000 профилей вместо 600, откликов стало 270 вместо 90 — втрое больше! Но до интервью дошло 10 человек вместо 9. Что это значит?',
+  pre:`<table>
+  <tr><th></th><th>Профили</th><th>Отклики</th><th>Скрининг</th><th>Интервью</th></tr>
+  <tr><td>было</td><td>600</td><td>90</td><td>30</td><td>9</td></tr>
+  <tr class="hot"><td>стало</td><td>2000</td><td>270</td><td>32</td><td>10</td></tr>
+  </table>`,
+  opts:['Отлично — откликов втрое больше, инструмент работает','Наловили не тех: объём вырос, а результат нет','Мало данных — подождём ещё пару месяцев'],
+  answer:1,
+  ok:'Да. Втрое больше откликов и тот же результат — значит инструмент тащит не тех. «Поймали больше» оказалось пустой цифрой. Хуже того: эти 270 откликов кому-то придётся разгребать — твоими же руками.',
+  no:'Не совсем. Смотри на конец цепочки: откликов втрое больше, а интервью столько же. Объём вырос, результат — нет. Значит ловим не тех.'},
+ {type:'info', who:'both', label:'HR + Продукт вместе',
+  h:'Что именно сломалось',
+  body:`<p>Вернись к ставке. Она состояла из двух частей — и сбылась наполовину:</p>
+  <table>
+  <tr><th>Часть гипотезы</th><th>Итог</th></tr>
+  <tr><td>Инструмент напишет <b>многим</b> → откликов больше</td><td>✅ сбылось: 90 → 270</td></tr>
+  <tr class="hot"><td>Инструмент найдёт <b>подходящих</b> → релевантных больше</td><td>❌ не сбылось: 30 → 32</td></tr>
+  </table>
+  <p>Сломалось то самое слово — <strong>«подходящих»</strong>. Инструмент ловит по формальным ключевым словам, а не по сути роли, и тащит всех подряд.</p>
+  <div class="box warn"><div class="bl">И главное — стало хуже</div><p>Задача была — освободить 40 часов. А получилось 270 откликов, которые кто-то должен разобрать. Твоими же руками. Инструмент не сэкономил время, а переложил его с поиска на разгребание.</p></div>
+  <div class="box tool"><div class="bl">Что делает продакт дальше</div><p>Инструмент не выбрасывает и охват не празднует. <strong>Сужает критерии и перепроверяет дёшево</strong> — одна вакансия, одна неделя. Новая гипотеза, уже узкая: «если искать не по ключевым словам, а по последним проектам — доля подходящих вырастет».</p></div>`},
+ {type:'quiz', who:'both', label:'HR + Продукт вместе',
+  h:'Ты сужаешь критерии: искать не по ключевым словам, а по последним проектам. Прогнали неделю на одной вакансии — и инструмент стал ловить МЕНЬШЕ:',
+  pre:`<table>
+  <tr><th>Этап</th><th>Профили</th><th>Отклики</th><th>Подходящих</th></tr>
+  <tr><td>до инструмента</td><td>600</td><td>90</td><td>30</td></tr>
+  <tr><td>первый запуск</td><td>2000</td><td>270</td><td>32</td></tr>
+  <tr class="hot"><td>после сужения</td><td>600</td><td>70</td><td>29</td></tr>
+  </table><p>Откликов теперь меньше, чем было вообще без инструмента. Это успех или провал?</p>`,
+  opts:['Провал — кандидатов стало меньше, чем до инструмента','Успех — подходящих столько же, а разбирать вчетверо меньше','Непонятно, надо смотреть ещё месяц'],
+  answer:1,
+  ok:'Да. Подходящих 29 против 30 — почти то же. А разбирать теперь 70 откликов вместо 270, и перебор 600 профилей делает машина. Вот теперь те самые 40 часов и освободились — гипотеза сбылась.',
+  no:'Не совсем. Смотри на то, ради чего всё затевалось: подходящих столько же (29 против 30), а разгребать теперь 70 откликов вместо 270, и профили перебирает машина. Часы освободились — значит сработало.'},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Продукт стал полезным, когда стал точнее — а не больше',
+  body:`<p>Смотри, что произошло. Первый запуск <strong>не был провалом</strong> — он был первым витком. Ты узнаёшь, какое предположение неверно, сужаешь ставку и перепроверяешь. Дёшево: одна вакансия, одна неделя.</p>
+  <div class="box ins"><div class="bl">Вот это и есть работа продакта</div><p>Не «придумал → сделал → сдал», а цикл: <b>гипотеза → проверка → уточнение → снова проверка</b>. Продакт не тот, кто угадывает с первого раза. Продакт тот, кто дёшево и быстро узнаёт, что не угадал.</p></div>
+  <div class="box tool"><div class="bl">Ты так уже работаешь</div><p>Когда первая пачка резюме не заходит заказчику, ты не рассылаешь ещё сто наугад. Идёшь уточнять профиль и пробуешь снова. Тот же цикл — просто в найме.</p></div>`}
+ ],
+ recap:`<div class="h">Пройден полный цикл</div>
+  <div><b>Дискавери:</b> находишь, где теряем, вместо того чтобы чинить наугад</div>
+  <div><b>Деливери:</b> выбираешь, что делать первым, и честно отрезаешь лишнее</div>
+  <div><b>Проверка:</b> формулируешь гипотезу и видишь, какое предположение сломалось</div>
+  <div>Проводишь границу: где продукт, а где человек</div>
+  <div><b>Второй виток:</b> сужаешь ставку, перепроверяешь дёшево — и часы наконец освобождаются</div>
+  <div class="h">Твои рекрутерские навыки, которые уже работают</div>
+  <div class="sk">Копаешь причины отказов кандидатов → это <b>дискавери</b></div>
+  <div class="sk">Режешь хотелки заказчика до выполнимых → это <b>приоритизация</b></div>
+  <div class="sk">Знаешь, что «пришлите ещё резюме» не работает → это <b>работа с гипотезой</b></div>
+  <div class="sk">Дожимаешь оффер через бренд и разговор → это то, что <b>не автоматизируется</b></div>`,
+ niche:`<div class="bl">Куда с этим идти</div><p>HR tech. Там твой найм-опыт — не «непрофильное прошлое», а преимущество: ты понимаешь пользователя изнутри, чего нет у обычного джуна-PM.</p>`
+},
+
+/* ============ МАРКЕТОЛОГ ============ */
+marketer:{
+ name:'Маркетолог', em:'📈', tag:'привлечение → growth-продакт',
+ goal:{role:'growth-продакт', why:'Привлечение уже за тобой — осталось добрать сам продукт'},
+ credit:'<span style="color:#7dd3fc">Маркетинг-консультант</span> — реалии перформанса · <span style="color:#a78bfa">Продуктовый эксперт</span> — механика',
+ steps:[
+ {type:'info', who:'hr', label:'Реалии маркетинга',
+  h:'Продакта сократили. Помочь просят тебя',
+  body:`<p>Ты перформанс-маркетолог. Продакта сократили. Приходит директор: «Ты знаешь наших пользователей лучше всех — помоги, продукт не растёт».</p>
+  <p>Открываешь цифры за месяц:</p>
+  <div class="funnel">ПРИВЛЕЧЕНИЕ — твоя половина
+  показы · клики · 2000 регистраций  ✅
+──────────────────────────────
+ПРОДУКТ — после клика
+   700  сделали первое действие
+   250  вернулись на 2-й день
+    90  остались через месяц</div>
+  <p>Половина привлечения идеальна: CTR, цена клика, конверсия лендинга — лучшие за год, лиды дешёвые. А во второй половине, уже внутри продукта, люди приходят и утекают, выручка стоит.</p>
+  <p>Раньше этой половиной занимался продакт. Его сократили — и разбираться теперь позвали тебя. Приём «докрутить креатив и залить ещё» здесь не помогает.</p>`},
+ {type:'quiz', who:'pm', label:'Продуктовая механика',
+  h:'Привлечение отличное, а роста нет. С чего начнёшь?',
+  opts:['Улучшить креативы и залить ещё бюджета — больше входящих','Понять, почему пришедшие уходят уже внутри продукта','Снизить цену лида — сделать привлечение ещё дешевле'],
+  answer:1,
+  ok:'Да. Реклама уже на максимуме. Раз трафик отличный, а роста нет, теряем не на входе, а после него — внутри продукта. Туда и смотрим.',
+  no:'Понятный ход, но здесь он не сработает: привлечение и так идеальное. Больше трафика в дырявое ведро — просто дороже. Продакт сначала смотрит, почему уходят внутри.'},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Путь пользователя — две половины',
+  body:`<p>То, что ты выбрал — «пойму, почему уходят» — это <strong>discovery</strong>: сначала найти проблему, потом решать.</p>
+  <p>Путь пользователя делится надвое. Первую половину ведёт реклама, вторую — продукт:</p>
+  <div class="funnel">── привлечение · реклама ──
+показ → клик → регистрация
+── продукт · после клика ──
+активация → 2-й день → удержание</div>
+  <p>Первая половина — привести и обещать. Вторая — доставить обещанное: довести до пользы и удержать. Рычаги разные: в первой это сообщение (креатив, оффер, аудитория), во второй — сам продукт.</p>
+  <div class="box ins"><div class="bl">Две метрики второй половины</div><p><strong>Активация</strong> — человек впервые получил пользу, сделал то, ради чего пришёл. <strong>Удержание</strong> — вернулся ли потом. Механику этой половины и разбираем.</p></div>`},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Где именно течёт',
+  body:`<table>
+  <tr><th>Половина</th><th>Этапы</th><th>Итог</th></tr>
+  <tr><td>Привлечение</td><td>показ → клик → регистрация</td><td>✅ лучшая за год</td></tr>
+  <tr class="hot"><td>Продукт</td><td>регистрация → активация → 2-й день → месяц</td><td>❌ течёт</td></tr>
+  </table>
+  <p><strong>Правило: привести пользователя дорого.</strong> Если он уходит, не дойдя до пользы, весь бюджет на его привлечение сгорел. Поэтому смотрим, где рвётся после регистрации.</p>
+  <p>Самый резкий обрыв — <strong>регистрация → активация: теряем две трети</strong> (2000 → 700). Люди зарегистрировались и не дошли до того, ради чего пришли.</p>
+  <div class="box warn"><div class="bl">Важный ход</div><p>Реклама тут лечит симптом: причина внутри продукта, и чинится она изменением продукта, не объявлением.</p></div>`},
+ {type:'info', who:'pm', label:'Исследование продукта',
+  h:'Как узнать, почему уходят внутри',
+  body:`<p>«Продукт не довёл до пользы» — пока гипотеза. Чтобы её проверить, нужно увидеть, что происходит после клика. В рекламном кабинете этого не видно — тут другой набор инструментов:</p>
+  <p>➖ <strong>продуктовая аналитика</strong> — воронка активации по шагам: на каком экране застревают, где отваливаются;<br>➖ <strong>записи сессий</strong> — как человек реально тыкается в интерфейс, где путается;<br>➖ <strong>опросы и интервью ушедших</strong> — «что помешало?», «чего ждали и не нашли?».</p>
+  <div class="box tool"><div class="bl">Реклама и продукт видят разное</div><p>Рекламные метрики показывают, кто пришёл. Эти инструменты — что с человеком стало внутри. Прежде чем менять продукт, смотрят, где и почему рвётся, — иначе меняешь наугад.</p></div>`},
+ {type:'quiz', who:'pm', label:'Продуктовая механика',
+  h:'Напрашивается ход: вернуть ушедших ретаргетом и письмами «вернись». Сработает?',
+  opts:['Да — ретаргет вернёт их, и проблема решится','Часть вернётся, но упрётся в ту же стену и уйдёт снова','Нет, ретаргет тут вообще не работает'],
+  answer:1,
+  ok:'Да, правда посередине. Ретаргет и правда вернёт часть — механика рабочая. Но вернувшиеся снова не получат пользы и уйдут опять. Это оплата второго круга того же оттока: отсрочка, а не лечение.',
+  no:'Крайности мимо. Ретаргет вернёт какую-то часть — не всех и не «вообще нет». Но вернувшиеся упрутся в ту же стену: продукт так и не довёл до пользы, и они уйдут снова. Пока не починен продукт, это второй платёж за тот же отвал.'},
+ {type:'info', who:'both', label:'Маркетинг + Продукт вместе',
+  h:'Где рычаг рекламы, а где рычаг продукта',
+  body:`<p>Реклама приводит и обещает. Продукт должен доставить обещанное — внутри. Если не доставляет, реклама не спасёт, только быстрее сожжёт бюджет.</p>
+  <p>Значит меняется рычаг. В привлечении рычаг — <strong>сообщение</strong>: заголовок, аудитория, оффер. В продукте рычаг — <strong>сам продукт</strong>: как встречает новичка, доводит ли до пользы. Теперь пробуем второй рычаг.</p>
+  <div class="box warn"><div class="bl">Граница честности</div><p>«Хорошая реклама вытащит любой продукт» — не бывает. Реклама приводит к двери, открывается она изнутри.</p></div>`},
+ {type:'quiz', who:'pm', label:'Продуктовая механика',
+  h:'Поменяли что-то в продукте. По какой цифре поймёшь, что стало лучше?',
+  opts:['Активация выросла — больше людей дошли до первого действия','Удержание выросло — больше людей осталось спустя месяц','Смотреть надо на обе, но решает удержание','CAC упал — привлекать стало дешевле'],
+  answer:2,
+  ok:'Да. Активация — полезный сигнал, но сама по себе обманывает: к первому действию можно протолкнуть и тех, кому продукт не нужен, — а они уйдут. Итог ловит удержание. Смотришь на обе, веришь удержанию.',
+  no:'Смотреть на что-то одно — ловушка. Активация без удержания — пустой рост (протолкнули к действию, а ушли). CAC — вообще про привлечение, а мы чиним продукт. Верно — обе метрики, но арбитр удержание: оно ловит реальную пользу.'},
+ {type:'info', who:'both', label:'Маркетинг + Продукт вместе',
+  h:'Всё это — деньги',
+  body:`<p>В маркетинге пользу считают через <strong>CAC</strong> (стоимость привлечения) и <strong>ROAS</strong> (отдачу на рекламу). Но всё это обнуляет или окупает <strong>LTV</strong> — сколько пользователь принесёт, если останется. Дешёвый лид, ушедший через день, — убыток. Удержанный дороже привлечённого.</p>
+  <p>В продукте логика та же: сначала сделать так, чтобы оставались, потом лить трафик. Иначе масштабируешь дырявое ведро.</p>
+  <div class="box ins"><div class="bl">И вот тут growth</div><p>Привлечение и удержание вместе — это связка growth-продакта, которой нет у обычного джуна-PM. Маркетинговый опыт здесь не «непрофильное прошлое», а половина суперсилы.</p></div>`},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Придумать — половина дела',
+  body:`<p>Идея есть: довести нового пользователя до первой пользы внутри продукта. Это не кампания, а изменение продукта. Дальше — <strong>деливери</strong>: что именно строим, в каком порядке, что отрезаем.</p>
+  <p>Реальность: один разработчик, два месяца. А задумано: направляемый первый шаг, подсказки, welcome-серия, дашборд активации, персонализация онбординга.</p>
+  <div class="box ins"><div class="bl">Ты не кодишь — ты выбираешь</div><p>Код пишет разработчик. Работа продакта — решить, ЧТО строить и ПОЧЕМУ именно эту фичу, и вести команду: объяснить, зачем она, держать фокус. Программировать уметь не нужно — нужно выбрать и объяснить.</p></div>
+  <div class="box warn"><div class="bl">Так не бывает</div><p>Всё сразу не влезет — придётся выбирать, что первым.</p></div>`},
+ {type:'quiz', who:'pm', label:'Продуктовая механика',
+  h:'Один разработчик, два месяца. Что делаешь первым?',
+  opts:['Дашборд активации — сначала видеть всю картину','Ядро: довести нового пользователя до первой пользы на одном ключевом шаге','Персонализацию онбординга — она самая умная'],
+  answer:1,
+  ok:'Да. Берём самое дешёвое, что проверяет главную ставку: доведём до первой пользы — останутся? Дашборды и персонализация потом, если ядро сработает.',
+  no:'Не совсем. И дашборд, и персонализация — вокруг ставки, а не её проверка (персонализация ещё и дорогая). Бери то, что дёшево и отвечает: доведём до пользы — останутся или нет.'},
+ {type:'info', who:'both', label:'Маркетинг + Продукт вместе',
+  h:'Это называется приоритизация',
+  body:`<p>Выбрать одно и отрезать остальное — это <strong>приоритизация</strong>, а первый маленький кусок, который проверяет идею, — <strong>MVP</strong>. Не «урезанная версия», а самый дешёвый способ проверить.</p>
+  <div class="box tool"><div class="bl">Тот же навык из маркетинга</div><p>Когда бюджет режут, а план — нет, решают, на какие кампании и аудитории тратить, а какие выключить. Это и есть приоритизация — «перераспределить бюджет». В продукте тем же движением выбираешь, что строить.</p></div>`},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Перед запуском — сформулируй ставку',
+  body:`<p>Прежде чем строить, продакт проговаривает, на что ставит. Не «сделаем и посмотрим», а <strong>гипотеза</strong> — проверяемая ставка с числом:</p>
+  <div class="box ins"><div class="bl">Твоя гипотеза</div><p><b>Если</b> довести новичков до первой пользы за первый заход,<br><b>то</b> из тех же ~700 активаций через месяц останется не 90, а хотя бы 150 (в 1,5 раза больше),<br><b>потому что</b> сейчас уходят, не увидев пользы.</p></div>
+  <div class="box warn"><div class="bl">Слово-предположение</div><p>Здесь всё держится на «до пользы». Ставка в том, что люди уходят от непонимания пользы, а не по другой причине (не тот пользователь, нет потребности). Обычно ломается оно.</p></div>`},
+ {type:'quiz', who:'pm', label:'Аналитика',
+  h:'Запустили направляемый первый шаг на A/B против контрольной группы, выборка большая. Активаций стало 1300 вместо 700 — почти вдвое! А через месяц осталось 100 вместо 90. Что это значит?',
+  pre:`<table>
+  <tr><th></th><th>Активация</th><th>Через месяц</th></tr>
+  <tr><td>было</td><td>700</td><td>90</td></tr>
+  <tr class="hot"><td>стало</td><td>1300</td><td>100</td></tr>
+  </table>`,
+  opts:['Отлично — активаций почти вдвое больше, инструмент работает','Второй шаг воронки подняли, а третий стоит: до действия дошло больше, а до пользы — нет','Может, повезло — подождём ещё месяц'],
+  answer:1,
+  ok:'Да. Активаций +600, а осталось всего на 10 больше. Шаг «регистрация → активация» починили, а «активация → удержание» стоит на месте. Протолкнули больше людей к действию, но не к пользе — и они всё равно ушли.',
+  no:'Это не удача и не победа. Выборка большая, сравнение с контролем — эффект реальный, но однобокий: активация почти вдвое, а удержание +10. Второй шаг подняли, третий стоит. До пользы так и не доводим.'},
+ {type:'info', who:'both', label:'Маркетинг + Продукт вместе',
+  h:'Что именно сломалось',
+  body:`<p>Вернись к ставке. Она состояла из двух частей — и сбылась наполовину:</p>
+  <table>
+  <tr><th>Часть гипотезы</th><th>Итог</th></tr>
+  <tr><td>Доведём до первого действия → активаций больше</td><td>✅ сбылось: 700 → 1300</td></tr>
+  <tr class="hot"><td>Действие = <b>«до пользы»</b> → останутся</td><td>❌ не сбылось: 90 → 100</td></tr>
+  </table>
+  <p>Сломалось <strong>«до пользы»</strong>. Первое действие и реальная польза — не одно и то же. Человека провели по шагам, но повода остаться не создали.</p>
+  <div class="box tool"><div class="bl">Что делает продакт дальше</div><p>Инструмент не выбрасывает и активации не празднует. Меняет суть шага и перепроверяет дёшево — один шаг, одна неделя. Новая гипотеза: вести не к «нажми», а к конкретному результату, который пользователь уносит.</p></div>`},
+ {type:'quiz', who:'both', label:'Маркетинг + Продукт вместе',
+  h:'Изменили первый шаг: ведёт не к «сделай действие», а к первому реальному результату. Тот же A/B, та же выборка. Активаций стало МЕНЬШЕ:',
+  pre:`<table>
+  <tr><th>Версия</th><th>Активация</th><th>Через месяц</th></tr>
+  <tr><td>до инструмента</td><td>700</td><td>90</td></tr>
+  <tr><td>шаг «сделай действие»</td><td>1300</td><td>100</td></tr>
+  <tr class="hot"><td>шаг «получи результат»</td><td>650</td><td>150</td></tr>
+  </table><p>Активаций теперь меньше, чем вообще без инструмента. Успех или провал?</p>`,
+  opts:['Провал — активаций меньше, чем до инструмента','Успех — удержание выросло в 1,5 раза: доходят те, кто получил пользу','Пока непонятно — эффект мог быть от сезонности'],
+  answer:1,
+  ok:'Да. Активаций 650 против 700 — почти то же, зато через месяц осталось 150 вместо 90, в 1,5 раза больше. Доходят те, кто получил пользу, и они остаются. Сезонность отпадает — сравнивали с контрольной группой в тот же период.',
+  no:'Смотри, ради чего всё было: удержание 90 → 150. Активаций чуть меньше, но остаются те, кто получил пользу. И это не сезонность — был контроль, тот же месяц. Значит сработало.'},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Продукт вырос, когда сменили рычаг — с рекламы на сам продукт',
+  body:`<p>Смотри, что произошло. Привлечение было идеальным и не двигало рост, потому что дыра была после клика. Рычаг сменили: перестали крутить объявление, поменяли сам продукт. Первый заход не был провалом — это был первый виток.</p>
+  <div class="box ins"><div class="bl">Вот это и есть работа продакта</div><p>Не сообщение о вещи, а сама вещь. И цикл: <b>гипотеза → проверка → уточнение → снова проверка</b>.</p></div>
+  <div class="box tool"><div class="bl">Знакомый ход</div><p>Когда кампания не окупается, её не заливают бюджетом наугад — сужают и пробуют снова. Тот же цикл, только рычаг теперь продукт, а не креатив.</p></div>`}
+ ],
+ recap:`<div class="h">Пройден полный цикл</div>
+  <div><b>Дискавери:</b> видишь, что рост стоит из-за дыры после клика, и знаешь, чем её искать</div>
+  <div><b>Инструменты продукта:</b> аналитика, записи сессий, интервью ушедших — не рекламный кабинет</div>
+  <div><b>Смена рычага:</b> чинишь сам продукт, а не сообщение о нём</div>
+  <div><b>Проверка:</b> гипотеза с числом, и видно, что «до действия» и «до пользы» — разное</div>
+  <div><b>Второй виток:</b> ведёшь к реальной пользе — и удержание растёт</div>
+  <div class="h">Навыки из маркетинга, которые работают и здесь</div>
+  <div class="sk">Перераспределяешь бюджет между кампаниями → это <b>приоритизация</b></div>
+  <div class="sk">Гоняешь A/B и читаешь воронку → это <b>работа с гипотезой и метриками</b></div>
+  <div class="sk">Считаешь, что дешёвый ушедший лид — убыток → это мышление про <b>LTV</b></div>
+  <div class="sk">Копаешь, почему не сработала кампания → это <b>дискавери</b></div>`,
+ niche:`<div class="bl">Куда с этим идти</div><p>Growth-продакт: активация и удержание. Там маркетинговый опыт — не «непрофильное прошлое», а половина суперсилы: привлечение уже за тобой, осталось добрать сам продукт.</p>`
+},
+
+/* ============ АНАЛИТИК ============ */
+analyst:{
+ name:'Аналитик', em:'📊', tag:'данные и метрики → продакт-аналитик',
+ goal:{role:'продакт-аналитик', why:'Ты уже находишь причины в данных — это половина работы продакта'},
+ credit:'<span style="color:#7dd3fc">Аналитик-консультант</span> — реалии аналитики · <span style="color:#a78bfa">Продуктовый эксперт</span> — механика',
+ steps:[
+ {type:'info', who:'hr', label:'Реалии аналитики',
+  h:'Продакта сократили. Помочь просят тебя',
+  body:`<p>Ты продуктовый аналитик в приложении для личных финансов — оно показывает, куда уходят деньги, если подключить карту. Продакта, который вёл онбординг, сократили. Приходит директор: «Retention упал, и мы не понимаем почему. Ты знаешь наши данные лучше всех — помоги».</p>
+  <p>Выгружаешь воронку активации за месяц:</p>
+  <div class="funnel">10 000  зарегистрировались
+ 6 000  прошли онбординг
+ 3 000  подключили карту, увидели первый отчёт
+ 1 200  вернулись на 2-й день
+   400  остались через месяц</div>
+  <p>Retention и правда просел: ещё квартал назад через месяц оставалось вдвое больше. Что-то сломалось — а что, пока непонятно.</p>`},
+ {type:'quiz', who:'pm', label:'Продуктовая механика',
+  h:'Retention упал. С чего начнёшь?',
+  opts:['Сразу переделать онбординг — наверняка дело в нём','Найти, на каком шаге отваливаются, и выдвинуть гипотезу почему','Попросить залить больше трафика в верх воронки'],
+  answer:1,
+  ok:'Да. Сначала найти конкретный обрыв и гипотезу почему — потом чинить. Дашборд, воронку, срезы ты для этого и соберёшь: это инструменты найти «где и почему», а не отдельный ход.',
+  no:'Рано действовать. «Переделать онбординг» — уже решение, а мы ещё не знаем, там ли проблема. Больше трафика тоже не диагностирует. Сначала найди обрыв и гипотезу — данными, воронкой, дашбордом.'},
+ {type:'info', who:'pm', label:'Аналитик и продакт',
+  h:'Что к твоей работе добавляет продакт',
+  body:`<p>То, что ты выбираешь — «найду, где отваливаются» — называется <strong>discovery</strong>. Воронку и конверсии ты считаешь каждый день.</p>
+  <p>Разница вот в чём. К «вот график, тут отвал» продакт добавляет по той же линии ещё два шага: <strong>ПОЧЕМУ</strong> отвал (гипотеза) и <strong>ЧТО ДЕЛАТЬ</strong> (решение).</p>
+  <div class="box ins"><div class="bl">Ты уже на полпути</div><p>Ты находишь <b>ГДЕ</b>. Продакт добавляет <b>ПОЧЕМУ</b> и <b>ЧТО ДЕЛАТЬ</b>. Это не «дорасти до продакта», а добрать два хода к тому, что ты уже делаешь.</p></div>`},
+ {type:'info', who:'pm', label:'Дискавери — как копают',
+  h:'Как найти точку, а не общий диагноз',
+  body:`<p>«Retention упал» — диагноз без адреса. Настоящее discovery — это <strong>резать данные, пока не найдёшь конкретную точку</strong>. Проверяешь версии по очереди и отсекаешь ложные:</p>
+  <table>
+  <tr><th>Версия</th><th>Как проверяешь</th><th>Итог</th></tr>
+  <tr><td>«Отваливаются все понемногу»</td><td>смотрю каждый шаг воронки</td><td>нет — один рвётся резче</td></tr>
+  <tr><td>«Дело в канале трафика»</td><td>бью retention по источникам</td><td>нет — во всех одинаково</td></tr>
+  <tr><td>«Проблема в мобилке»</td><td>бью по устройству</td><td>нет — и там, и там</td></tr>
+  <tr class="hot"><td>«Стоп на одном экране»</td><td>смотрю экраны внутри онбординга</td><td>ДА — 80% отвала на «подключить карту»</td></tr>
+  </table>
+  <div class="box ins"><div class="bl">Вот это и есть discovery</div><p>Не «плохо вообще», а <strong>«вот этот экран, вот здесь теряем»</strong>. Ты отсёк три ложные версии и нашёл точку. Копание — это отсечение объяснений, пока не останется одно.</p></div>`},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Теперь считаем — и переводим точку в гипотезу',
+  body:`<table>
+  <tr><th>Переход</th><th>Числа</th><th>Конверсия</th></tr>
+  <tr><td>Регистрация → онбординг</td><td>10000 → 6000</td><td>60%</td></tr>
+  <tr class="hot"><td>Онбординг → первый отчёт</td><td>6000 → 3000</td><td>50% ← весь провал на «подключить карту»</td></tr>
+  <tr><td>Первый отчёт → 2-й день</td><td>3000 → 1200</td><td>40%</td></tr>
+  <tr><td>2-й день → 30-й день</td><td>1200 → 400</td><td>33%</td></tr>
+  </table>
+  <p><strong>Правило: чем ниже по воронке потеря — тем она дороже.</strong> Вернуть ушедшего после месяца дороже, чем не потерять его на онбординге. Но самый обидный обрыв — здесь, в середине: половина застревает на экране «подключить карту», не дойдя до первой пользы — первого отчёта по тратам.</p>
+  <div class="box ins"><div class="bl">Из точки — в гипотезу почему</div><p>Экран «подключить карту» просит доступ к банку <strong>до</strong> того, как человек увидел пользу. Гипотеза: бросают не потому, что не поняли продукт, а потому что отдавать доступ к карте страшно раньше, чем ясно зачем.</p></div>`},
+ {type:'quiz', who:'pm', label:'Продуктовая механика',
+  h:'Идея: инструмент ловит момент, когда пользователь застрял на экране «подключить карту», и помогает пройти его. Где он играет в воронке?',
+  opts:['На обрыве онбординг → первый отчёт — там, где теряем половину','В самом конце, на удержании к 30-му дню','На регистрации, в самом верху'],
+  answer:0,
+  ok:'Да. Он работает на том обрыве, что ты нашёл: доводит застрявших до первого отчёта. Бьёт по конкретной точке, а не «по retention вообще».',
+  no:'Не совсем. Инструмент помогает застрявшим на «подключить карту» — значит играет на обрыве онбординг → первый отчёт, где и теряем половину. Конец воронки — уже следствие.'},
+ {type:'info', who:'both', label:'Аналитика + Продукт вместе',
+  h:'Где заканчивается инструмент и начинается ценность',
+  body:`<p>Инструмент помогает пройти экран. Но остаётся человек не из-за подсказки, а потому что <strong>увидел пользу</strong> — понял, куда уходят деньги. Подсказками нельзя удержать в бесполезном продукте — это <strong>не автоматизируется</strong>.</p>
+  <div class="box tool"><div class="bl">Твой ход</div><p>Ты проводишь границу: пройти экран можно подсказать, а желание остаться — нет. Это продуктовое решение о границах — одно из самых взрослых, что делает PM.</p></div>
+  <p>Автоматизация окупается там, где много рутины. Ловить застревание и помочь пройти шаг — рутина, её не жалко машине. Сделать продукт ценным, чтобы захотелось вернуться, — не рутина, отдать нельзя.</p>
+  <div class="box warn"><div class="bl">Граница честности</div><p>«Подсказки сами удержат» — не бывает. Инструмент доводит до действия, а не создаёт смысл возвращаться.</p></div>`},
+ {type:'quiz', who:'pm', label:'Продуктовая механика',
+  h:'Инструмент помогает пройти экран. На что смотреть, чтобы понять, что он реально помог удержанию?',
+  opts:['Сколько прошли экран «подключить карту»','Сколько осталось через месяц','Сколько кликнули по подсказке'],
+  answer:1,
+  ok:'Да. Инструмент запускали ради удержания — по нему и меряем: сколько осталось. Прохождение экрана — важный промежуточный шаг, но его подъём ещё не значит, что люди остались (скоро увидишь, как это расходится). Клики по подсказке — vanity.',
+  no:'Клики по подсказке — vanity, активность без результата. «Прошли экран» — важный промежуточный шаг, но не цель: протолкнуть можно и тех, кто потом уйдёт. Цель — удержание, по нему и меряем: сколько осталось через месяц.'},
+ {type:'info', who:'both', label:'Аналитика + Продукт вместе',
+  h:'Всё это — деньги, и в твоём мире тоже',
+  body:`<p>В аналитике польза считается так: <strong>retention</strong> (удержание — доля вернувшихся спустя время) ведёт к <strong>LTV</strong> (сколько принесёт оставшийся), плюс стоимость возврата ушедшего. Поднять долю дошедших до пользы — это прямые деньги продукта.</p>
+  <p>В продукте логика та же: удержанный пользователь дороже привлечённого, потому что привлечение уже оплачено, а он ещё и возвращается.</p>
+  <div class="box ins"><div class="bl">И вот тут product analytics</div><p>Инструмент на данных, где ты читаешь поведение пользователя изнутри, — этого нет у обычного джуна-PM. Аналитический опыт здесь не «непрофильное прошлое», а преимущество.</p></div>`},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Придумать — половина дела',
+  body:`<p>Идея есть. Дальше начинается вторая работа продакта — <strong>деливери</strong>: решить, что именно делаем, в каком порядке, и что честно отрезаем.</p>
+  <p>Реальность: у тебя <strong>один разработчик и два месяца</strong>. А задумано было: детект застревания, подсказки, A/B-платформа, дашборд по всем шагам, ML-предсказание оттока.</p>
+  <div class="box ins"><div class="bl">Ты не кодишь — ты выбираешь</div><p>Код пишет разработчик. Работа продакта — решить, ЧТО строить и ПОЧЕМУ именно эту фичу, и вести команду: объяснить, зачем она, держать фокус. Программировать уметь не нужно — нужно выбрать и объяснить.</p></div>
+  <div class="box warn"><div class="bl">Так не бывает</div><p>Всё сразу не влезет — надо выбирать, что первым.</p></div>`},
+ {type:'quiz', who:'pm', label:'Продуктовая механика',
+  h:'Один разработчик, два месяца. Что берёшь первым?',
+  opts:['Дашборд по всем шагам — сначала увидеть всю картину','Детект застревания на «подключить карту» + одна подсказка','ML-модель предсказания оттока — она самая умная'],
+  answer:1,
+  ok:'Да. Берём самое дешёвое, что проверяет главную ставку: доводит подсказка застрявших или нет. Дашборд и ML — потом, если ядро сработает.',
+  no:'И дашборд по всему, и ML — дорого и мимо главной ставки. Дашборд покажет картину, но не проверит, помогает ли подсказка. ML — про предсказание, а не про этот шаг. Бери то, что дёшево и отвечает «доводит или нет».'},
+ {type:'info', who:'both', label:'Аналитика + Продукт вместе',
+  h:'Это называется приоритизация',
+  body:`<p>Выбрать одно и отрезать остальное — это <strong>приоритизация</strong>, а первый маленький кусок, который проверяет идею, — <strong>MVP</strong>. Не «урезанная версия», а самый дешёвый способ проверить.</p>
+  <div class="box tool"><div class="bl">Тот же навык из аналитики</div><p>Когда прилетает десять запросов на отчёты, решаешь, какой посчитать первым, а какие подождут. Это она и есть — приоритизация. В аналитике это «разобрать бэклог задач».</p></div>`},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Перед запуском — сформулируй ставку',
+  body:`<p>Прежде чем строить, продакт вслух проговаривает, на что ставит. Не «сделаем и посмотрим», а <strong>гипотеза</strong> — проверяемая ставка с числом:</p>
+  <div class="box ins"><div class="bl">Твоя гипотеза</div><p><b>Если</b> помогать пройти «подключить карту» в момент застревания,<br><b>то</b> из застрявших через месяц останется заметно больше — не 400, а хотя бы 520 (в 1,3 раза),<br><b>потому что</b> сейчас они бросают, не поняв, что делать дальше.</p></div>
+  <div class="box warn"><div class="bl">Слово-предположение</div><p>Здесь всё держится на «не поняв, что делать». Ставка в том, что причина отвала — непонимание шага, а не страх отдать доступ к карте раньше, чем ясно зачем. Обычно ломается оно.</p></div>`},
+ {type:'quiz', who:'pm', label:'Аналитика',
+  h:'Запустили на A/B против контроля, выборка большая. Экран «подключить карту» прошло 4200 вместо 3000 — на 1200 больше! А через месяц осталось 420 вместо 400. Что это значит?',
+  pre:`<table>
+  <tr><th></th><th>Онбординг</th><th>Прошли экран</th><th>Через месяц</th></tr>
+  <tr><td>было</td><td>6000</td><td>3000</td><td>400</td></tr>
+  <tr class="hot"><td>стало</td><td>6000</td><td>4200</td><td>420</td></tr>
+  </table>`,
+  opts:['Отлично — экран прошло намного больше, инструмент работает','Экран стали проходить, а удерживаться — нет: до отчёта дошло больше, а до пользы так и нет','Может, повезло — подождём ещё месяц'],
+  answer:1,
+  ok:'Да. Прошедших экран +1200, а осталось всего на 20 больше. Шаг «пройти экран» починили, а «остаться» — стоит. Протолкнули людей дальше, но повода вернуться не дали, и они всё равно ушли. Выборка большая, контроль есть — эффект реальный, но однобокий.',
+  no:'Это не удача и не победа. A/B с контролем, выборка большая — эффект настоящий, но кривой: экран проходят на 1200 больше, а удержание +20. Второй шаг подняли, третий стоит. До пользы так и не доводим.'},
+ {type:'info', who:'both', label:'Аналитика + Продукт вместе',
+  h:'Что именно сломалось',
+  body:`<p>Вернись к ставке. Она состояла из двух частей — и сбылась наполовину:</p>
+  <table>
+  <tr><th>Часть гипотезы</th><th>Итог</th></tr>
+  <tr><td>Подсказка объяснит <b>как</b> → экран пройдут</td><td>✅ сбылось: 3000 → 4200</td></tr>
+  <tr class="hot"><td>Это <b>удержит</b> → останутся через месяц</td><td>❌ не сбылось: 400 → 420</td></tr>
+  </table>
+  <p>Сломалось предположение <strong>«не поняли, что делать»</strong>. Настоящая причина была не «не понял как», а <strong>«боязно отдать карту, пока не ясно зачем»</strong>. Подсказка провела через шаг, но пользу вперёд не показала.</p>
+  <div class="box warn"><div class="bl">И главное — не стало лучше</div><p>Задача была — поднять удержание. А получилось больше прошедших экран и почти те же 400 оставшихся. Инструмент протолкнул людей глубже, но повода вернуться не создал.</p></div>
+  <div class="box tool"><div class="bl">Что делает продакт дальше</div><p>Инструмент не выбрасывает. Меняет суть подсказки и перепроверяет дёшево — один шаг, одна неделя. Новая гипотеза: показать пользу до подключения — например, демо-отчёт на примере, — тогда карту дадут те, кто увидел зачем.</p></div>`},
+ {type:'quiz', who:'both', label:'Аналитика + Продукт вместе',
+  h:'Показываешь пользу до подключения: демо-отчёт на примере, и только потом просишь карту. Тот же A/B, та же выборка. Экран стало проходить МЕНЬШЕ:',
+  pre:`<table>
+  <tr><th>Версия</th><th>Прошли экран</th><th>Через месяц</th></tr>
+  <tr><td>до инструмента</td><td>3000</td><td>400</td></tr>
+  <tr><td>подсказка «как пройти»</td><td>4200</td><td>420</td></tr>
+  <tr class="hot"><td>показали пользу до карты</td><td>2800</td><td>520</td></tr>
+  </table><p>Экран проходит меньше, чем вообще без инструмента. Успех или провал?</p>`,
+  opts:['Провал — экран проходит меньше, чем до инструмента','Успех — удержание выросло с 400 до 520: карту дают те, кто увидел пользу','Пока непонятно — мог быть сезонный скачок'],
+  answer:1,
+  ok:'Да. Экран прошло 2800 против 3000 — почти то же, зато через месяц осталось 520 вместо 400, в 1,3 раза больше. Карту дают те, кто увидел пользу, и они остаются. Сезонность отпадает — был контроль в тот же период.',
+  no:'Смотри, ради чего всё было: удержание 400 → 520. Экран проходит чуть меньше, но остаются те, кто увидел пользу. И это не сезон — сравнивали с контролем. Значит сработало.'},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Продукт стал полезным, когда стал точнее — а не больше',
+  body:`<p>Смотри, что произошло. Первый запуск <strong>не был провалом</strong> — он был первым витком. Ты узнаёшь, какое предположение неверно, меняешь подход и перепроверяешь. Дёшево: один шаг, одна неделя.</p>
+  <div class="box ins"><div class="bl">Вот это и есть работа продакта</div><p>Не «придумал → сделал → сдал», а цикл: <b>гипотеза → проверка → уточнение → снова проверка</b>. И весь путь ты проходишь от «вот где обрыв» до «вот что с ним делать» — то, что добавляется к твоему «где».</p></div>
+  <div class="box tool"><div class="bl">Знакомый ход</div><p>Когда метрика падает, ты не строишь ещё десять графиков наугад. Выдвигаешь гипотезу почему и проверяешь. Тот же цикл — просто теперь ты ещё и решаешь, что делать.</p></div>`}
+ ],
+ recap:`<div class="h">Пройден полный цикл</div>
+  <div><b>Дискавери:</b> отсекаешь ложные версии и находишь точку — «вот этот экран», а не «retention вообще»</div>
+  <div><b>Деливери:</b> выбираешь, что делать первым, и честно отрезаешь лишнее</div>
+  <div><b>Проверка:</b> гипотеза с числом, и видно, какое предположение сломалось</div>
+  <div>Добираешь к своему «где» ещё «почему» и «что делать»</div>
+  <div><b>Второй виток:</b> показал пользу до подключения — и удержание выросло</div>
+  <div class="h">Навыки из аналитики, которые работают и здесь</div>
+  <div class="sk">Режешь данные по срезам, пока не найдёшь причину → это <b>дискавери</b></div>
+  <div class="sk">Разбираешь бэклог запросов на отчёты → это <b>приоритизация</b></div>
+  <div class="sk">Знаешь, что «клики по подсказке» ничего не значат → отличаешь <b>vanity-метрику</b></div>
+  <div class="sk">Читаешь A/B и не путаешь эффект с сезонностью → это <b>работа с данными</b></div>`,
+ niche:`<div class="bl">Куда с этим идти</div><p>Product analytics и data-продукты. Там опыт с данными — не «непрофильное прошлое», а преимущество: ты читаешь поведение пользователя изнутри, чего нет у обычного джуна-PM.</p>`
+},
+
+/* ============ ПРОДЖЕКТ ============ */
+pm:{
+ name:'Проджект', em:'🗂', tag:'сроки и delivery → delivery-продакт',
+ goal:{role:'delivery-сильный продакт', why:'Довозить до релиза умеют единицы — это твоя фора'},
+ credit:'<span style="color:#7dd3fc">Проджект-консультант</span> — реалии delivery · <span style="color:#a78bfa">Продуктовый эксперт</span> — механика',
+ steps:[
+ {type:'info', who:'hr', label:'Реалии проджекта',
+  h:'Продакта сократили. Зовут тебя',
+  body:`<p>Ты проджект в продуктовой компании. Продакта сократили, и директор идёт к тебе: «Ты довозишь лучше всех — подхвати».</p>
+  <p>Открываешь итоги квартала:</p>
+  <div class="funnel">15  фич запланировали
+12  выпустили в срок   (on-time 80%)
+ 2  подняли бизнес-цифру</div>
+  <p>Два числа. Первое — <strong>on-time</strong>, доля фич, вышедших в срок: 80%, честный повод гордиться. Второе — сколько из них реально подняли что-то в бизнесе: выручку, удержание, хоть какую цифру. Таких две. Остальные десять вышли вовремя и не изменили ничего.</p>
+  <p>Команда пашет, релизы идут, бизнес-цифры стоят. «Всё успеваем — а зачем?»</p>`},
+ {type:'quiz', who:'pm', label:'Продуктовая механика',
+  h:'Релизы в срок, а бизнес-цифры стоят. С чего начнёшь?',
+  opts:['Разобрать, чем 2 сработавшие фичи отличались от 10 пустых','Собрать у стейкхолдеров приоритеты и спланировать спринты плотнее','Сократить релизный цикл — выкатывать чаще, проверять больше'],
+  answer:0,
+  ok:'Верно. 80% в срок — машина везёт исправно. Вопрос не «быстрее ли едем», а «то ли грузим». Сравнишь две сработавшие фичи с десятью пустыми — там и увидишь, где сломан отбор.',
+  no:'И «спланировать плотнее», и «выкатывать чаще» — про скорость. А скорость у тебя уже отличная, 80% в срок. Стоит результат: из выпущенного почти ничто не двигает цифру. Начать стоит оттуда — чем 2 сработавшие фичи отличались от 10 пустых.'},
+ {type:'info', who:'pm', label:'Зачем вообще продакты',
+  h:'Деливери ты умеешь. Тогда зачем нужны продакты?',
+  body:`<p>Довозить в срок, держать скоуп, разруливать зависимости — ты это умеешь, и умеют немногие. Учить тебя этому не нужно.</p>
+  <p>Но вот факт: ты всё довёл в срок, а бизнес не вырос. Значит одного делать-в-срок мало. Тогда зачем вообще нужны продакты?</p>
+  <p>Ответ простой. К сроку и скоупу продакт добавляет ещё один вопрос и держит его всё время: <strong>идёт ли импакт</strong> — растёт ли та цифра, ради которой всё затевали. И если не растёт — меняет курс, не дожидаясь финала.</p>
+  <div class="box ins"><div class="bl">Что добираем</div><p>Импакт — рост целевой цифры (выручки, удержания, чего вы хотели поднять). Твоя задача здесь — добрать один вопрос: не «успеем ли», а «а оно вообще двигает цель». Первый у тебя уже на автомате, поверх него ложится второй.</p></div>`},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'А в скорости ли дело?',
+  body:`<table>
+  <tr><th>Показатель</th><th>Числа</th><th>Что значит</th></tr>
+  <tr><td>Фич в срок (on-time)</td><td>12 из 15</td><td>80% — сильно</td></tr>
+  <tr class="hot"><td>Фич, поднявших цифру (hit-rate)</td><td>2 из 12</td><td>17%</td></tr>
+  </table>
+  <p><strong>hit-rate</strong> — доля выпущенных фич, что реально сдвинули метрику. У тебя 17%: из 12 вышедших в цель попали две. Десять отработали в срок и вхолостую.</p>
+  <p>Скорость в норме. Значит дело не в том, как быстро делаете, а в том, что выбираете. Фичи брали по громкости — кто настойчивее просил, ту и ставили.</p>
+  <div class="box ins"><div class="bl">Открытие</div><p>Дорого не «не успеть». Дорого — успеть сделать то, что не двигает цель. В каждую холостую фичу уложены недели команды.</p></div>`},
+ {type:'info', who:'pm', label:'Исследование перед выбором',
+  h:'Прежде чем выбирать — узнай, кого это касается',
+  body:`<p>Чтобы выбрать фичу по эффекту, нужны два числа: скольких она затронет и насколько им это важно. Эти числа не угадывают — их достают. Продакт для этого:</p>
+  <p>➖ поднимает <strong>аналитику</strong> — сколько людей доходит до этого места в продукте, как часто, где отваливаются;<br>➖ <strong>говорит с пользователями</strong> — это правда болит или из серии «было бы неплохо».</p>
+  <p>Только теперь у фичи есть настоящие числа: эта касается 60% и болит, та — 5% и терпимо.</p>
+  <div class="box tool"><div class="bl">Без этого шага — гадание</div><p>«60%» и «5%» не берутся из головы. Их достают из данных и из разговоров. Сначала исследование — потом выбор.</p></div>`},
+ {type:'quiz', who:'pm', label:'Продуктовая механика',
+  h:'Аналитика: фича затронет 8% пользователей. Стейкхолдер настаивает — это крупные клиенты, на них половина выручки. Твой ход?',
+  opts:['Отклонить — 8% мало, по охвату не проходит','Не решать по одному охвату: свести охват с эффектом на выручку, тогда выбирать','Взять — раз крупные клиенты и стейкхолдер уверен'],
+  answer:1,
+  ok:'Да. Охват — половина картины. 8% с огромным эффектом на выручку могут стоить дороже 60% с копеечным. Считаешь охват вместе с силой эффекта, а не что-то одно. И слова про «половину выручки» проверяешь по цифрам, а не на веру.',
+  no:'И «отклонить по охвату», и «взять, раз крупные» — решения по одному числу. Охват 8% сам по себе ничего не значит без эффекта: если на этих клиентах правда половина выручки, эффект огромен. Свести охват с эффектом — и тогда решать по цифрам, а не по напору.'},
+ {type:'info', who:'both', label:'Проджект + Продукт вместе',
+  h:'Данные сужают — выбираешь ты',
+  body:`<p>Даже когда у каждой фичи есть ожидаемый эффект в цифрах, выбор остаётся за человеком. Идей тридцать, а бюджета на три. Бюджет здесь — <strong>недели команды</strong>, их всегда меньше, чем хочется. Числа покажут, какие фичи сильнее, но куда вложить эти недели — твоё решение. Это и есть стратегия.</p>
+  <div class="box tool"><div class="bl">Вот это и есть продуктовая работа</div><p>Не в том, чтобы посчитать — посчитает и таблица. А в том, чтобы выбрать ставку под ограниченный бюджет. Delivery подсказывает, во что фича обойдётся, исследование — что она даст. Складываешь и ставишь.</p></div>
+  <div class="box warn"><div class="bl">Граница честности</div><p>«Числа сами всё отранжируют и решат за меня» — так не бывает. Данные сужают выбор, ставку делает человек.</p></div>`},
+ {type:'info', who:'both', label:'Проджект + Продукт вместе',
+  h:'Всё это — деньги. И бывает, правильный ход — остановиться',
+  body:`<p>Неделя команды стоит денег. Фича, что не сдвинула цифру, — сожжённые недели.</p>
+  <p>Продакт всё время держит в голове вопрос, которого нет у деливери: а импакт-то идёт? И если по ходу видно, что нет, — надо что-то менять. Это не лёгкое «ну и ладно»: сначала копаешь, где ошибся, пробуешь другой подход, идёшь доресёрчить. Но в какой-то момент решение — свернуть проект или развернуть — принимать тебе. И принять придётся, а не тянуть из жалости к уже вложенному.</p>
+  <div class="box ins"><div class="bl">Что добавляет продакт</div><p>Готовность остановиться. Если по ходу видно, что импакт не идёт, продакт меняет курс или закрывает проект — а не тянет только потому, что уже начал. Довести до конца — не самоцель; цель в том, чтобы цифра сдвинулась.</p></div>`},
+ {type:'quiz', who:'pm', label:'Продуктовая механика',
+  h:'Фичу B делают уже 2 недели из 3. Ранняя аналитика на бете: импакт не идёт, целевая цифра не шевелится. Что делаешь?',
+  opts:['Доделать — вложили две недели, бросать на финише глупо','Свернуть сейчас и спасти последнюю неделю под фичу с импактом','Добавить людей, чтобы точно успеть в срок'],
+  answer:1,
+  ok:'Да. Две недели уже потрачены — их не вернуть ничем. Решается только последняя: слить её в фичу без импакта или спасти. Свернуть тут не «махнуть рукой»: разберёшь, где промахнулся, и вернёшь неделю в дело. А тянуть до конца ради вложенного — ловушка sunk cost (потопленные затраты).',
+  no:'Это ловушка потопленных затрат (sunk cost): «уже вложили, жалко бросать». Но две недели не вернёшь, что ни делай. На кону только последняя — отдать её фиче без импакта или спасти. Свернуть здесь не поражение, а разворот: понять ошибку и вложить неделю в то, что двигает цель.'},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Придумать — половина дела',
+  body:`<p>Идея простая: у каждой фичи до старта записать, какую цифру она должна поднять, а после релиза — свести обещанное с фактом. Самое наглядное — дашборд: слева обещанная цифра, справа фактическая, сразу видно, кто попал.</p>
+  <p>Дальше решаешь, что делаем первым. Реальность: один разработчик, два месяца. А в планах — и дашборд, и напоминания командам, и интеграция с трекером задач, и автосбор метрик.</p>
+  <div class="box ins"><div class="bl">Ты не кодишь — ты выбираешь</div><p>Код пишет разработчик. Работа продакта — решить, ЧТО строить и ПОЧЕМУ именно это, и вести команду: объяснить, зачем, держать фокус. Программировать уметь не нужно — нужно выбрать и объяснить.</p></div>
+  <div class="box warn"><div class="bl">Так не бывает</div><p>Всё сразу не влезет. Придётся выбирать. Кстати, ты сейчас приоритизируешь и собственный инструмент — тем самым навыком.</p></div>`},
+ {type:'quiz', who:'pm', label:'Продуктовая механика',
+  h:'Ты поднял аналитику. Вот две фичи. Какую в спринт первой?',
+  pre:`<table>
+  <tr><th>Фича</th><th>Работа</th><th>Охват</th><th>Эффект</th></tr>
+  <tr><td>A</td><td>2 дня</td><td>5%</td><td>слабый</td></tr>
+  <tr class="hot"><td>B</td><td>3 недели</td><td>60%</td><td>сильный</td></tr>
+  </table>`,
+  opts:['A — дёшево, влезает в спринт, релиз через два дня','B — дороже, зато охват и эффект несопоставимо больше','Сначала A как быструю победу, B — следом'],
+  answer:1,
+  ok:'Да. A дешёвая, но 5% и слабый эффект — итог около нуля. B втрое дороже, зато 60% охвата и сильный эффект. На тот же бюджет команды B приносит кратно больше. Дешевизна не аргумент, когда затрагивает пятерых из ста.',
+  no:'«Влезает и быстро релизится» — соблазнительно, но «быстро» и «ценно» — разное. A касается 5% со слабым эффектом, недели уходят почти впустую. Продакт берёт B: охват и эффект кратно выше.'},
+ {type:'info', who:'both', label:'Проджект + Продукт вместе',
+  h:'Ты только что посчитал RICE',
+  body:`<p>Выбор по эффекту, а не по «что быстрее задеплоить», в продукте свёрнут в формулу — <strong>RICE</strong>. Четыре буквы, и каждую ты уже трогал:</p>
+  <table>
+  <tr><th>Буква</th><th>Вопрос</th><th>Откуда берёшь</th></tr>
+  <tr><td><b>R</b> — Reach</td><td>скольких затронет</td><td>те 60% или 5% — из аналитики</td></tr>
+  <tr><td><b>I</b> — Impact</td><td>насколько сильно на каждого</td><td>сильно/слабо — из разговоров</td></tr>
+  <tr><td><b>C</b> — Confidence</td><td>насколько уверен в оценке</td><td>скидка на неопределённость: 100 / 80 / 50%</td></tr>
+  <tr><td><b>E</b> — Effort</td><td>во что обойдётся команде</td><td>привычная тебе оценка сроков и сил</td></tr>
+  </table>
+  <p>Считается <b>R × I × C ÷ E</b>. Смотри, где Effort: в знаменателе, один множитель из четырёх. Легко смотреть на него одного — дёшево и в срок. RICE держит его в ряду с охватом, силой эффекта и уверенностью.</p>
+  <div class="box tool"><div class="bl">Половину формулы ты уже считаешь</div><p>Резать скоуп до выполнимого — это и есть оценка Effort, по силам команды. RICE добавляет первые три буквы: не «влезет ли», а «даст ли больше остальных».</p></div>`},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Перед запуском — назови ставку',
+  body:`<p>До старта продакт проговаривает, на что ставит. Не «сделаем и посмотрим», а <strong>гипотеза</strong> — проверяемая ставка вида «если — то — потому что»:</p>
+  <div class="box ins"><div class="bl">Твоя гипотеза</div><p><b>Если</b> фичу не брать в спринт, пока не названа ожидаемая цифра,<br><b>то</b> пустые фичи перестанут проходить и hit-rate вырастет,<br><b>потому что</b> сейчас фичи берут по громкости, а не по числам.</p></div>
+  <p>Такой чек на входе ты уже знаешь: это как <strong>Definition of Ready</strong> в Scrum или ревью перед мёржем — код не уходит в прод без ревью, фича не уйдёт в спринт без обещанной цифры.</p>
+  <div class="box warn"><div class="bl">Держи в уме</div><p>Ставка держится на одном допущении: что цифру назовут честно, а не подгонят под уже выбранную фичу. Это допущение чаще всего и не сбывается.</p></div>`},
+ {type:'quiz', who:'pm', label:'Аналитика',
+  h:'Ввели чек: теперь у каждой фичи названа ожидаемая цифра — раньше не было ни у одной. Но попаданий больше не стало. О чём это?',
+  pre:`<table>
+  <tr><th></th><th>Ожидаемая цифра</th><th>Попали</th></tr>
+  <tr><td>было</td><td>ни у одной фичи</td><td>2 из 12 (17%)</td></tr>
+  <tr><td>стало</td><td>у всех фич</td><td>3 из 14 (21%)</td></tr>
+  </table>`,
+  opts:['Отлично — теперь у всех фич есть цель, порядок наведён','Цифру вписывают для галочки, под уже решённую фичу — заполнено, а выбор прежний','Данных мало, нужен ещё квартал'],
+  answer:1,
+  ok:'Да. Заполнили у всех, а попаданий столько же — значит цифру подгоняют под фичу, которую и так решили брать. Чек стал формальностью.',
+  no:'Смотри на попадания, а не на заполненность. Цифра есть у всех, а доля сдвинувших цель почти не выросла. Чек проходят — выбирают по-старому.'},
+ {type:'info', who:'both', label:'Проджект + Продукт вместе',
+  h:'Что сломалось',
+  body:`<p>Вернись к ставке. В ней было два допущения, а сбылось одно:</p>
+  <table>
+  <tr><th>Допущение</th><th>Итог</th></tr>
+  <tr><td>Появится чек → цифру <b>назовут</b></td><td>✅ 0 → у всех фич</td></tr>
+  <tr class="hot"><td>Цифра честная → <b>выбор станет лучше</b></td><td>❌ hit-rate 17% → 21%</td></tr>
+  </table>
+  <p>Треснуло второе: команда вписывает цифру задним числом, под уже пролоббированную фичу. Чек есть, решение прежнее.</p>
+  <div class="box warn"><div class="bl">И лучше не стало</div><p>Добавили бумажную работу, а пустые фичи всё те же.</p></div>
+  <div class="box tool"><div class="bl">Что делает продакт дальше</div><p>Идею не бросает и заполняемость не празднует. Усиливает чек и проверяет дёшево — одна команда, один спринт. Новая версия: фичу не берут, пока ожидаемую цифру не подтвердил второй человек.</p></div>`},
+ {type:'quiz', who:'both', label:'Проджект + Продукт вместе',
+  h:'Усилили чек: фичу не берут, пока ожидаемую цифру не подтвердил второй человек. Прогнали спринт:',
+  pre:`<table>
+  <tr><th>Версия</th><th>Взяли</th><th>Попали</th><th>Впустую</th></tr>
+  <tr><td>без чека</td><td>12</td><td>2</td><td>10</td></tr>
+  <tr><td>чек для галочки</td><td>14</td><td>3</td><td>11</td></tr>
+  <tr class="hot"><td>чек с проверкой</td><td>8</td><td>3</td><td>5</td></tr>
+  </table>`,
+  opts:['Провал — команда стала брать меньше фич','Успех — попаданий не меньше, а холостых вдвое меньше: hit-rate удвоился','Пока непонятно, нужен ещё квартал'],
+  answer:1,
+  ok:'Да. Фич 8 вместо 14, а попали те же три — зато холостых 5 вместо 11. Недели команды перестали гореть впустую. Hit-rate 38% — не 100%, и не будет: даже хороший отбор часто мимо, угадать заранее нельзя. Оттого импакт и сверяют, а не верят в него.',
+  no:'Смотри не на число фич, а на холостые: их стало вдвое меньше (5 против 11), а попаданий столько же. Недели больше не уходят впустую, hit-rate удвоился. Для отбора это и есть успех.'},
+ {type:'info', who:'pm', label:'Продуктовая механика',
+  h:'Продукт растёт, когда сверяешься — а не когда просто везёшь',
+  body:`<p>Собери всё вместе. Продукт добавляет к сроку и скоупу постоянную сверку: идёт ли импакт. И если не идёт — развернуть или закрыть, не тратя деньги на то, что не выгорит.</p>
+  <div class="box ins"><div class="bl">Вот это и есть работа продакта</div><p>Не «взялся — довёл любой ценой», а цикл: поставил гипотезу → проверил на цифрах → уточнил → проверил снова. Плюс готовность сменить курс, когда импакт не идёт.</p></div>
+  <div class="box tool"><div class="bl">Ты так уже работаешь</div><p>Когда в спринт лезет лишнее, ты не гонишь всё подряд — режешь до нужного. Тот же ход. Раньше резал по срокам, теперь ещё и по эффекту.</p></div>`}
+ ],
+ recap:`<div class="h">Итог кейса — замер</div>
+  <div>hit-rate: 17% → 38%. Вдвое больше попаданий на фичу</div>
+  <div>холостых фич вдвое меньше — недели команды не горят впустую</div>
+  <div>ни одного нового человека — вырос только отбор</div>
+  <div class="h">Что ты добрал к своему деливери</div>
+  <div><b>Дискавери-шаг:</b> дело было не в скорости, а в отборе фич</div>
+  <div><b>Исследование:</b> поднял аналитику и спросил пользователей — узнал реальные охват и силу эффекта</div>
+  <div><b>RICE:</b> выбираешь по эффекту, а не по «что быстрее задеплоить»</div>
+  <div><b>Сверка и разворот:</b> проверяешь, идёт ли импакт, и меняешь курс, не идя на поводу у sunk cost</div>
+  <div class="h">Сильная сторона, что остаётся с тобой</div>
+  <div class="sk">Довозишь до релиза, когда другие вязнут → редкий навык</div>
+  <div class="sk">Держишь сроки и зависимости → готовый Effort в RICE</div>
+  <div class="sk">Режешь скоуп до выполнимого → оценка сил команды</div>`,
+ niche:`<div class="bl">Куда с этим идти</div><p>Delivery-сильный продакт и product ops. Продакт и проджект — не «выше и ниже», а две профессии. Ты добираешь дискавери-шаг, исследование и RICE, оставляя при себе то, на чём буксует половина продактов: умение довозить.</p>`
+}
+
+};
+/* ================= КОНЕЦ ПАКОВ ================= */
+
+let activeCase=null, STEPS=[], i=0, answers={}, totalQuiz=0;
+const app=document.getElementById('app');
+const noteEl=document.getElementById('note');
+const topbar=document.getElementById('topbar');
+const correctCount = () => STEPS.reduce((n,s,idx)=> n + (s.type==='quiz' && answers[idx]===s.answer ? 1 : 0), 0);
+
+function goHome(){
+  activeCase=null; i=0; answers={};
+  topbar.style.display='none';
+  noteEl.innerHTML='Один кейс — один твой знакомый процесс, показанный как продуктовая работа.';
+  try{ if(TG&&TG.BackButton) TG.BackButton.hide(); }catch(e){}
+  const cards=Object.keys(CASES).map(key=>{
+    const c=CASES[key];
+    return `<button class="pick" onclick="startCase('${key}')">
+      <span class="em">${c.em}</span>
+      <span class="tt"><span class="nm">${c.name}</span><span class="tg">${c.tag}</span></span>
+      <span class="ar">→</span></button>`;
+  }).join('');
+  app.innerHTML=`<div class="home">
+    <h1>Поймёшь, чем занимается продакт — <span class="g">на языке своей профессии</span></h1>
+    <p>Никаких лекций. Берём процесс, который ты и так знаешь каждый день, и показываем: это и есть продуктовая работа.</p>
+    <div class="pick-q">Кем ты работаешь?</div>
+    <div style="font-size:12.5px;color:var(--mute);margin:-4px 0 14px;line-height:1.45">Слева — твоя профессия, справа — продуктовая роль, где твой опыт даёт фору.</div>
+    <div class="picks">${cards}<button class="pick pick-other" onclick="otherProf()">
+      <span class="em">✍️</span>
+      <span class="tt"><span class="nm">У меня другая профессия</span><span class="tg">скажи какая — сделаем кейс под тебя</span></span>
+      <span class="ar">→</span></button></div>
+    <div class="fine">Кейс собран командой: профильный консультант — реалии профессии · продуктовый эксперт — механика</div>
+  </div>`;
+  window.scrollTo(0,0);
+}
+
+function otherProf(){
+  haptic('light');
+  topbar.style.display='none';
+  app.innerHTML=`<div class="home">
+    <h1>Сделаем кейс <span class="g">под твою профессию</span></h1>
+    <p>Мы собираем кейсы под конкретные профессии. Напиши свою — если наберётся спрос, соберём и её.</p>
+    <div class="pick-q">По какой специальности хочешь в продакты?</div>
+    <input class="other-in" id="otherIn" placeholder="например: юрист, дизайнер, врач, HR…" autocomplete="off">
+    <button class="btn" onclick="submitOther()">Отправить</button>
+    <button class="btn2" onclick="goHome()">Назад к списку</button>
+  </div>`;
+  try{ document.getElementById('otherIn').focus(); }catch(e){}
+  window.scrollTo(0,0);
+}
+function submitOther(){
+  const el=document.getElementById('otherIn'); const v=(el&&el.value||'').trim();
+  if(!v){ try{ el.focus(); }catch(e){} return; }
+  haptic('ok');
+  track('other_profession',{text:v});
+  app.innerHTML=`<div class="home" style="justify-content:center;text-align:center">
+    <div style="font-size:56px">🙏</div>
+    <h1 style="text-align:center">Записал: <span class="g">${v.replace(/</g,'&lt;')}</span></h1>
+    <p style="text-align:center">Спасибо. Смотрим, на какие профессии наберётся спрос, — и собираем следующими</p>
+    <button class="btn2" onclick="goHome()">Назад к списку</button>
+  </div>`;
+  window.scrollTo(0,0);
+}
+
+function startCase(key){
+  haptic('light');
+  track('case_start',{profession:key});
+  activeCase=key;
+  STEPS=CASES[key].steps.concat([{type:'done'}]);
+  totalQuiz=STEPS.filter(s=>s.type==='quiz').length;
+  i=0; answers={};
+  topbar.style.display='flex';
+  noteEl.innerHTML='Кейс собран в паре: '+CASES[key].credit;
+  render();
+}
+
+function back(){
+  if(activeCase===null) return;
+  if(i>0){ i--; render(); }
+  else { goHome(); }
+}
+
+function render(){
+  const s=STEPS[i], C=CASES[activeCase];
+  if(s.type!=='done') track('step_view',{profession:activeCase, step:i});
+  document.getElementById('fill').style.width=(i/(STEPS.length-1)*100)+'%';
+  document.getElementById('stepN').textContent = s.type==='done'?'✓':`${i+1}/${STEPS.length-1}`;
+  try{ if(TG&&TG.BackButton) TG.BackButton.show(); }catch(e){}
+
+  if(s.type==='done'){
+    track('case_complete',{profession:activeCase, correct:correctCount(), total:totalQuiz});
+    app.innerHTML=`<div class="done"><div class="big">🎉</div>
+      <h2>Кейс пройден</h2><p>Правильных ответов: ${correctCount()} из ${totalQuiz}</p>
+      <div class="ddv-final"><div class="t">Вот и весь продакт:<br><b>Дискавери → Деливери → Проверка</b><br>Понять что делать · сделать · убедиться, что попали</div></div>
+      <div class="recap">${C.recap}</div>
+      <div class="box ins" style="width:100%;text-align:left">${C.niche}</div>
+      <div class="survey" id="survey">
+        <div class="sv-goal">
+          <div class="lbl">твоя цель в продукте</div>
+          <div class="role">${C.goal.role}</div>
+          <div class="why">${C.goal.why}</div>
+        </div>
+        <div class="sv-q">Пойдёшь учиться на продакта — по-настоящему, на кейсах своей профессии?</div>
+        <div class="sv-cta">
+          <button class="btn ok" onclick="surveyYes()">Да, интересно</button>
+          <button class="btn2" onclick="surveyNo()">Пока нет</button>
+        </div>
+      </div>
+      <button class="btn2" onclick="startCase('${activeCase}')">Пройти заново</button>
+      <button class="btn2" onclick="goHome()">Другая профессия</button></div>`;
+    window.scrollTo(0,0);
+    return;
+  }
+
+  if(s.type==='info'){
+    app.innerHTML=`<div class="stage">
+      <span class="who ${s.who}">${s.label}</span>
+      <h2>${s.h}</h2>${s.body}
+      <div class="foot"><button class="btn" onclick="next()">Продолжить</button></div></div>`;
+  } else {
+    const prev=answers[i], done=prev!==undefined, ok=done&&prev===s.answer;
+    app.innerHTML=`<div class="stage">
+      <span class="who ${s.who}">${s.label}</span>
+      <h2>${s.h}</h2>${s.pre||''}
+      <div class="opts" id="opts">${s.opts.map((o,k)=>{
+        let cls=''; if(done){ if(k===s.answer)cls=' right'; else if(k===prev)cls=' wrong'; }
+        return `<button class="opt${cls}" ${done?'style="pointer-events:none"':''} onclick="pick(${k})"><span class="k">${String.fromCharCode(65+k)}</span><span>${o}</span></button>`;
+      }).join('')}</div>
+      <div class="foot">
+        <div class="verdict ${done?'show '+(ok?'ok':'no'):''}" id="v">${done?(ok?'✓ '+s.ok:'💡 '+s.no):''}</div>
+        <button class="btn ${done&&ok?'ok':''}" id="nb" ${done?'':'disabled'} onclick="next()">${done?'Дальше':'Проверить'}</button></div></div>`;
+  }
+  window.scrollTo(0,0);
+}
+function pick(k){
+  if(answers[i]!==undefined) return;
+  answers[i]=k;
+  const s=STEPS[i], ok=k===s.answer;
+  haptic(ok?'ok':'no');
+  document.querySelectorAll('#opts .opt').forEach((o,x)=>{o.style.pointerEvents='none';
+    if(x===s.answer)o.classList.add('right'); if(x===k&&!ok)o.classList.add('wrong');});
+  const v=document.getElementById('v');
+  v.className='verdict show '+(ok?'ok':'no');
+  v.innerHTML=(ok?'✓ ':'💡 ')+(ok?s.ok:s.no);
+  const b=document.getElementById('nb'); b.disabled=false; b.textContent='Дальше'; if(ok)b.classList.add('ok');
+}
+function next(){ haptic('light'); i++; render(); }
+
+function surveyYes(){
+  haptic('ok'); const g=CASES[activeCase].goal;
+  track('fakedoor_yes',{profession:activeCase});
+  const el=document.getElementById('survey'); if(el) el.innerHTML=`
+    <div class="sv-done"><span class="em">🔥</span>Огонь, формат зашёл</div>
+    <div class="sv-note" style="text-align:center">Полный курс — весь путь в <b>${g.role}</b> на кейсах твоей профессии — уже собираем. Ты в списке первых</div>`;
+}
+function surveyNo(){
+  haptic('light'); track('survey_no',{profession:activeCase});
+  const el=document.getElementById('survey'); if(el) el.innerHTML=`
+    <div class="sv-q">Честно, что не так?</div>
+    <div class="sv-opts">
+      <button class="sv-o" onclick="surveyReason('nothing_new')">Интересно, но ничего нового не узнал</button>
+      <button class="sv-o" onclick="surveyReason('hard')">Много непонятного</button>
+      <button class="sv-o" onclick="surveyReason('boring')">Всё понятно, но не цепляет</button>
+      <button class="sv-o" onclick="surveyReason('no_value')">Не увидел пользы лично для себя</button>
+      <button class="sv-o" onclick="surveyReason('mismatch')">Не совпало с моей профессией</button>
+    </div>`;
+}
+function surveyReason(r){
+  haptic('light'); track('survey_reason',{profession:activeCase, reason:r});
+  const el=document.getElementById('survey'); if(el) el.innerHTML=`<div class="sv-done" style="font-size:15px">Спасибо, записал 🙏<br>По таким ответам и правим</div>`;
+}
+
+goHome();
+track('app_open');
+</script>
+</body>
+</html>
