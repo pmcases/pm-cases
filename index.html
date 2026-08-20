@@ -73,7 +73,7 @@
   .opt.wrong{border-color:#6b5563;background:#2a1f2a55;opacity:.75}
   @keyframes pop{40%{transform:scale(1.02)}}
 
-  .foot{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(15,17,23,0),var(--bg) 30%);padding:14px 0 20px;margin-top:16px}
+  .foot{background:none;padding:14px 0 20px;margin-top:16px}
   .verdict{border-radius:12px;padding:13px 15px;margin-bottom:11px;font-size:14px;line-height:1.6;display:none;animation:in .25s}
   .verdict.show{display:block}
   .verdict.ok{background:#052e1633;color:#86efac;border:1px solid #166534}
@@ -126,7 +126,7 @@
     <button class="x" id="backBtn" onclick="back()" title="Назад">←</button>
     <div class="bar"><i id="fill"></i></div>
     <span class="step-n" id="stepN"></span>
-    <button class="x" onclick="goHome()" title="К выбору профессии">⌂</button>
+    <button class="x" onclick="goHome()" title="К выбору профессии">🏠</button>
   </div>
   <div id="app"></div>
 </div>
@@ -890,6 +890,7 @@ function pick(k){
   v.className='verdict show '+(ok?'ok':'no');
   v.innerHTML=(ok?'✓ ':'💡 ')+(ok?s.ok:s.no);
   const b=document.getElementById('nb'); b.disabled=false; b.textContent='Дальше'; if(ok)b.classList.add('ok');
+  try{ b.scrollIntoView({behavior:'smooth', block:'end'}); }catch(e){}
 }
 function next(){ haptic('light'); i++; render(); }
 
